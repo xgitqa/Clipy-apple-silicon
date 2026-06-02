@@ -1,0 +1,67 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+env:
+  DEVELOPER_DIR: /Applications/Xcode_26.5.app/Contents/Developer
+
+jobs:
+  build-and-release:
+    runs-on: macos-26
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Cache Swift packages
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        with:
+          path: .spm-cache
+          key: spm-${{ runner.os }}-${{ hashFiles('**/Package.resolved') }}
+          restore-keys: |
+            spm-${{ runner.os }}-
+
+      - name: Build Release
+        run: |
+          xcodebuild \
+            CODE_SIGN_IDENTITY=- \
+            CODE_SIGNING_REQUIRED=YES \
+            CODE_SIGNING_ALLOWED=YES \
+            ARCHS=arm64 \
+            EXCLUDED_ARCHS=x86_64 \
+            -scheme Clipy \
+            -project Clipy.xcodeproj \
+            -configuration Release \
+            -derivedDataPath "$GITHUB_WORKSPACE/build" \
+            -clonedSourcePackagesDirPath "$GITHUB_WORKSPACE/.spm-cache/SourcePackages" \
+            -packageCachePath "$GITHUB_WORKSPACE/.spm-cache/PackageCache" \
+            -skipPackagePluginValidation \
+            -skipMacroValidation \
+            build
+
+      - name: Package app
+        run: |
+          APP_PATH="$GITHUB_WORKSPACE/build/Build/Products/Release/Clipy.app"
+          ZIP_NAME="Clipy-${{ github.ref_name }}-arm64.zip"
+          ditto -c -k --sequesterRsrc --keepParent "$APP_PATH" "$GITHUB_WORKSPACE/$ZIP_NAME"
+          echo "ZIP_NAME=$ZIP_NAME" >> $GITHUB_ENV
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@72f2c25fcb47643c292f7107632f7a47c1df5cd8 # v2.3.2
+        with:
+          files: ${{ env.ZIP_NAME }}
+          generate_release_notes: true
+          body: |
+            ## Clipy ${{ github.ref_name }} — Apple Silicon
+
+            Native arm64 build for Apple Silicon Macs (M1 or later). macOS 13 Ventura or later required. No Rosetta needed.
+
+            ### Install
+            1. Download `Clipy-${{ github.ref_name }}-arm64.zip` below.
+            2. Unzip and move `Clipy.app` to `/Applications`.
+            3. Right-click → Open (first launch only, since the build is ad-hoc signed and not notarized).
+            4. Grant Accessibility permission when prompted.

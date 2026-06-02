@@ -14,4 +14,6 @@
 ARCHS = arm64
 EXCLUDED_ARCHS = x86_64
 
-#include "Configurations/CodeSigning.xcconfig"
+// Use ad-hoc signing by default (no Apple Developer account required).
+// Maintainers with a Developer ID certificate can switch to CodeSigning.xcconfig.
+#include "Configurations/CodeSigning-AdHoc.xcconfig"
