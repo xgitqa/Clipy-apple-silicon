@@ -27,20 +27,20 @@ extension AccessibilityService {
         if AXIsProcessTrustedWithOptions(opts) {
             return true
         }
-        // AXIsProcessTrustedWithOptions can return false for unsigned/ad-hoc signed
-        // builds even when accessibility is granted. Verify with a practical test
-        // before showing any prompt.
+        // AXIsProcessTrustedWithOptions can return false for ad-hoc signed builds
+        // even when accessibility is granted in System Preferences. Verify by
+        // probing the AX API directly: kAXErrorAPIDisabled is the definitive
+        // "not trusted" response. Any other result (.success, .noValue,
+        // .cannotComplete, etc.) means the API is reachable — access is granted.
+        // .cannotComplete occurs normally right after a menu closes while macOS
+        // is transitioning focus back to the previous app.
         var value: CFTypeRef?
         let result = AXUIElementCopyAttributeValue(
             AXUIElementCreateSystemWide(),
             kAXFocusedApplicationAttribute as CFString,
             &value
         )
-        // .success means an app has focus and we got it — trust is granted.
-        // .noValue means no app has focus (e.g. menu just closed) but the API
-        // accepted the call — trust is still granted.
-        // .apiDisabled or .cannotComplete means no trust.
-        if result == .success || result == .noValue {
+        if result != .apiDisabled {
             return true
         }
         if isPrompt {
