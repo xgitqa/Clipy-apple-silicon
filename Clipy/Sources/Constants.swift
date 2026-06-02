@@ -79,11 +79,6 @@ struct Constants {
         static let observerScreenshot = "kCPYBetaObserveScreenshot"
     }
 
-    struct Update {
-        static let enableAutomaticCheck = "kCPYEnableAutomaticCheckKey"
-        static let checkInterval = "kCPYUpdateCheckIntervalKey"
-    }
-
     struct Notification {
         static let closeSnippetEditor = "kCPYSnippetEditorWillCloseNotification"
     }
