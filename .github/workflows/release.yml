@@ -4,6 +4,12 @@ on:
   push:
     tags:
       - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag (e.g. v2.0.0)'
+        required: true
+        default: 'v2.0.0'
 
 env:
   DEVELOPER_DIR: /Applications/Xcode_26.5.app/Contents/Developer
@@ -16,6 +22,14 @@ jobs:
 
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Set release tag
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "RELEASE_TAG=${{ github.event.inputs.tag }}" >> $GITHUB_ENV
+          else
+            echo "RELEASE_TAG=${{ github.ref_name }}" >> $GITHUB_ENV
+          fi
 
       - name: Cache Swift packages
         uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
@@ -46,22 +60,23 @@ jobs:
       - name: Package app
         run: |
           APP_PATH="$GITHUB_WORKSPACE/build/Build/Products/Release/Clipy.app"
-          ZIP_NAME="Clipy-${{ github.ref_name }}-arm64.zip"
+          ZIP_NAME="Clipy-${{ env.RELEASE_TAG }}-arm64.zip"
           ditto -c -k --sequesterRsrc --keepParent "$APP_PATH" "$GITHUB_WORKSPACE/$ZIP_NAME"
           echo "ZIP_NAME=$ZIP_NAME" >> $GITHUB_ENV
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@72f2c25fcb47643c292f7107632f7a47c1df5cd8 # v2.3.2
         with:
+          tag_name: ${{ env.RELEASE_TAG }}
           files: ${{ env.ZIP_NAME }}
           generate_release_notes: true
           body: |
-            ## Clipy ${{ github.ref_name }} — Apple Silicon
+            ## Clipy ${{ env.RELEASE_TAG }} — Apple Silicon
 
             Native arm64 build for Apple Silicon Macs (M1 or later). macOS 13 Ventura or later required. No Rosetta needed.
 
             ### Install
-            1. Download `Clipy-${{ github.ref_name }}-arm64.zip` below.
+            1. Download `Clipy-${{ env.RELEASE_TAG }}-arm64.zip` below.
             2. Unzip and move `Clipy.app` to `/Applications`.
-            3. Right-click → Open (first launch only, since the build is ad-hoc signed and not notarized).
+            3. Right-click → Open (first launch only — the build is ad-hoc signed, not notarized).
             4. Grant Accessibility permission when prompted.
