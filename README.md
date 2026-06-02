@@ -4,16 +4,15 @@
 
 <br>
 
-![CI](https://github.com/Clipy/Clipy/workflows/CI/badge.svg)
-[![Release version](https://img.shields.io/github/release/Clipy/Clipy.svg)](https://github.com/Clipy/Clipy/releases/latest)
-[![OpenCollective](https://opencollective.com/clipy/backers/badge.svg)](#backers)
-[![OpenCollective](https://opencollective.com/clipy/sponsors/badge.svg)](#sponsors)
+![CI](https://github.com/xgitqa/Clipy-apple-silicon/workflows/CI/badge.svg)
 
-Clipy is a Clipboard extension app for macOS.
+Clipy is a Clipboard extension app for macOS — **Apple Silicon only** (arm64). No Rosetta 2 required.
 
 ---
 
-__Requirement__: macOS 13 Ventura or later
+__Requirement__: Mac with Apple Silicon (M1 or later), macOS 13 Ventura or later
+
+> **Note:** This fork removes Intel (x86\_64) support. Apple is ending Rosetta 2 support in a future macOS release. This build targets arm64 natively and does not run on Intel Macs.
 
 __Distribution Site__ : <https://clipy-app.com>
 
