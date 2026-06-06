@@ -32,3 +32,21 @@ jobs:
           -skipPackagePluginValidation \
           -skipMacroValidation \
           clean test
+
+    - name: Verify arm64 Release build
+      run: |
+        xcodebuild \
+          CODE_SIGN_IDENTITY=- \
+          CODE_SIGNING_REQUIRED=YES \
+          CODE_SIGNING_ALLOWED=YES \
+          ARCHS=arm64 \
+          -scheme Clipy \
+          -project Clipy.xcodeproj \
+          -configuration Release \
+          -derivedDataPath "$GITHUB_WORKSPACE/build" \
+          -clonedSourcePackagesDirPath "$GITHUB_WORKSPACE/.spm-cache/SourcePackages" \
+          -packageCachePath "$GITHUB_WORKSPACE/.spm-cache/PackageCache" \
+          -skipPackagePluginValidation \
+          -skipMacroValidation \
+          build
+        lipo -verify_arch arm64 "$GITHUB_WORKSPACE/build/Build/Products/Release/Clipy.app/Contents/MacOS/Clipy"

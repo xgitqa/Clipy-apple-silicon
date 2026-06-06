@@ -34,7 +34,7 @@ final class DataCleanService {
 
     // MARK: - Delete Data
     func cleanDatas() {
-        let realm = try! Realm()
+        guard let realm = try? Realm() else { return }
         let flowHistories = overflowingClips(with: realm)
         flowHistories
             .filter { !$0.isInvalidated && !$0.thumbnailPath.isEmpty }

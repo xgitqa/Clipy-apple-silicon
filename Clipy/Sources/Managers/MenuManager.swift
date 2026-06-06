@@ -36,7 +36,7 @@ final class MenuManager: NSObject {
     fileprivate let kMaxKeyEquivalents = 10
     fileprivate let shortenSymbol = "..."
     // Realm
-    fileprivate let realm = try! Realm()
+    fileprivate var realm: Realm? = try? Realm()
     fileprivate var clipToken: NotificationToken?
     fileprivate var snippetToken: NotificationToken?
 
@@ -104,7 +104,7 @@ extension MenuManager {
 private extension MenuManager {
     func bind() {
         // Realm Notification
-        clipToken = realm.objects(CPYClip.self)
+        clipToken = realm?.objects(CPYClip.self)
                         .observe { [weak self] _ in
                             DispatchQueue.main.async { [weak self] in
                                 self?.createClipMenu()
@@ -279,7 +279,7 @@ private extension MenuManager {
         var subMenuIndex = 1 + placeInLine
 
         let ascending = !AppEnvironment.current.defaults.bool(forKey: Constants.UserDefaults.reorderClipsAfterPasting)
-        let clipResults = realm.objects(CPYClip.self).sorted(byKeyPath: #keyPath(CPYClip.updateTime), ascending: ascending)
+        guard let clipResults = realm?.objects(CPYClip.self).sorted(byKeyPath: #keyPath(CPYClip.updateTime), ascending: ascending) else { return }
         let currentSize = Int(clipResults.count)
         var i = 0
         for clip in clipResults {

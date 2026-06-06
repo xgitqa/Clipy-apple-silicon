@@ -51,7 +51,7 @@ final class ClipService {
     }
 
     func clearAll() {
-        let realm = try! Realm()
+        guard let realm = try? Realm() else { return }
         let clips = realm.objects(CPYClip.self)
 
         // Delete saved images
@@ -66,7 +66,7 @@ final class ClipService {
     }
 
     func delete(with clip: CPYClip) {
-        let realm = try! Realm()
+        guard let realm = try? Realm() else { return }
         // Delete saved images
         let path = clip.thumbnailPath
         if !path.isEmpty {
@@ -113,7 +113,7 @@ extension ClipService {
     }
 
     fileprivate func save(with data: CPYClipData) {
-        let realm = try! Realm()
+        guard let realm = try? Realm() else { return }
         // Copy already copied history
         let isCopySameHistory = AppEnvironment.current.defaults.bool(forKey: Constants.UserDefaults.copySameHistory)
         if realm.object(ofType: CPYClip.self, forPrimaryKey: "\(data.hash)") != nil, !isCopySameHistory { return }
@@ -150,9 +150,10 @@ extension ClipService {
                 clip.isColorCode = true
             }
             // Save Realm and .data file
-            let dispatchRealm = try! Realm()
+            guard let dispatchRealm = try? Realm() else { return }
             if CPYUtilities.prepareSaveToPath(CPYUtilities.applicationSupportFolder()) {
-                if NSKeyedArchiver.archiveRootObject(data, toFile: savedPath) {
+                if let archivedData = try? NSKeyedArchiver.archivedData(withRootObject: data, requiringSecureCoding: false),
+                   (try? archivedData.write(to: URL(fileURLWithPath: savedPath))) != nil {
                     dispatchRealm.transaction {
                         dispatchRealm.add(clip, update: .all)
                     }

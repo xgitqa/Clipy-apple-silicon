@@ -30,6 +30,12 @@ brew install --cask clipy-apple-silicon
 
 <img src="http://clipy-app.com/img/screenshot1.png" width="400">
 
+### What's new in v2.0.2
+
+- **Security:** Replaced all deprecated `NSKeyedUnarchiver.unarchiveObject` calls with the modern `NSKeyedUnarchiver` instance API, eliminating insecure deserialization warnings.
+- **Stability:** Replaced all force-try (`try!`) Realm database calls with proper error handling — the app now shows a clear error dialog instead of crashing if the database cannot be opened.
+- **CI:** Added a Release build step with `lipo -verify_arch arm64` to verify every CI run produces a native arm64 binary.
+
 ### Development Environment
 * macOS 26 Tahoe
 * Xcode 26.5
