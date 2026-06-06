@@ -19,6 +19,15 @@ __Requirement__: Mac with Apple Silicon (M1 or later), macOS 13 Ventura or later
 
 **[→ Download the latest release](https://github.com/xgitqa/Clipy-apple-silicon/releases/latest)**
 
+Unzip and move `Clipy.app` to `/Applications`. On first launch, right-click → Open (the build is ad-hoc signed, not notarized).
+
+#### Install via Homebrew
+
+```sh
+brew tap xgitqa/clipy-apple-silicon
+brew install --cask clipy-apple-silicon
+```
+
 <img src="http://clipy-app.com/img/screenshot1.png" width="400">
 
 ### Development Environment
