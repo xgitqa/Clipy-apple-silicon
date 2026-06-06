@@ -37,14 +37,23 @@ class AppDelegate: NSObject, NSMenuItemValidation {
         // Migrate Realm
         Realm.migration()
         prepareDependencies { values in
-            try! values.bootstrapDatabase()
+            do {
+                try values.bootstrapDatabase()
+            } catch {
+                let alert = NSAlert()
+                alert.messageText = String(localized: "Database Error")
+                alert.informativeText = String(localized: "Clipy could not open its database and must quit. Try removing ~/Library/Application Support/Clipy and relaunch.")
+                alert.addButton(withTitle: String(localized: "Quit"))
+                alert.runModal()
+                NSApplication.shared.terminate(nil)
+            }
         }
     }
 
     // MARK: - NSMenuItem Validation
     func validateMenuItem(_ menuItem: NSMenuItem) -> Bool {
         if menuItem.action == #selector(AppDelegate.clearAllHistory) {
-            let realm = try! Realm()
+            guard let realm = try? Realm() else { return false }
             return !realm.objects(CPYClip.self).isEmpty
         }
         return true
@@ -103,7 +112,10 @@ class AppDelegate: NSObject, NSMenuItemValidation {
             NSSound.beep()
             return
         }
-        let realm = try! Realm()
+        guard let realm = try? Realm() else {
+            NSSound.beep()
+            return
+        }
         guard let clip = realm.object(ofType: CPYClip.self, forPrimaryKey: primaryKey) else {
             CPYUtilities.sendCustomLog(with: "Cannot fetch clip data")
             NSSound.beep()
